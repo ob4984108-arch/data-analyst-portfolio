@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电商用户行为数据分析 · 项目作品集</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+  :root {
+    color-scheme: light;
+    --page-plane:    #f9f9f7;
+    --surface-1:     #fcfcfb;
+    --text-primary:  #0b0b0b;
+    --text-secondary:#52514e;
+    --text-muted:    #898781;
+    --gridline:      #e1e0d9;
+    --baseline:      #c3c2b7;
+    --border:        rgba(11,11,11,0.10);
+    --series-1:      #2a78d6;
+    --series-2:      #eb6834;
+    --series-3:      #1baf7a;
+    --series-4:      #eda100;
+    --series-5:      #e87ba4;
+    --seq-250:#86b6ef; --seq-300:#6da7ec; --seq-450:#2a78d6; --seq-600:#184f95;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page-plane:    #0d0d0d;
+      --surface-1:     #1a1a19;
+      --text-primary:  #ffffff;
+      --text-secondary:#c3c2b7;
+      --text-muted:    #898781;
+      --gridline:      #2c2c2a;
+      --baseline:      #383835;
+      --border:        rgba(255,255,255,0.10);
+      --series-1:      #3987e5;
+      --series-2:      #d95926;
+      --series-3:      #199e70;
+      --series-4:      #c98500;
+      --series-5:      #d55181;
+      --seq-250:#4f82c0; --seq-300:#6da7ec; --seq-450:#3987e5; --seq-600:#86b6ef;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page-plane:    #0d0d0d;
+    --surface-1:     #1a1a19;
+    --text-primary:  #ffffff;
+    --text-secondary:#c3c2b7;
+    --text-muted:    #898781;
+    --gridline:      #2c2c2a;
+    --baseline:      #383835;
+    --border:        rgba(255,255,255,0.10);
+    --series-1:      #3987e5;
+    --series-2:      #d95926;
+    --series-3:      #199e70;
+    --series-4:      #c98500;
+    --series-5:      #d55181;
+    --seq-250:#4f82c0; --seq-300:#6da7ec; --seq-450:#3987e5; --seq-600:#86b6ef;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--page-plane);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 1px solid var(--border); padding: 40px 0 32px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  .badge {
+    font-size: 12px; color: var(--text-secondary);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+  }
+  .theme-btn {
+    font: inherit; font-size: 13px; color: var(--text-primary);
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 14px; cursor: pointer;
+  }
+  .theme-btn:hover { border-color: var(--baseline); }
+  h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+  .subtitle { color: var(--text-secondary); font-size: 16px; margin-top: 8px; max-width: 640px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .meta span {
+    font-size: 12.5px; color: var(--text-secondary);
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 10px;
+  }
+
+  /* ---------- sections ---------- */
+  section { padding: 36px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  .sec-title { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; }
+
+  /* ---------- overview ---------- */
+  .overview { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .overview { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+  .card p, .card li { font-size: 14px; color: var(--text-secondary); }
+  .card ul { padding-left: 18px; }
+  .card li { margin-bottom: 6px; }
+  .card code {
+    font-family: "Cascadia Code", "SF Mono", Consolas, monospace; font-size: 12.5px;
+    background: var(--page-plane); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 6px;
+  }
+  .disclaimer {
+    margin-top: 16px; padding: 12px 14px; border-radius: 8px;
+    background: var(--page-plane); border: 1px solid var(--border);
+    font-size: 13px; color: var(--text-secondary);
+  }
+
+  /* ---------- KPI ---------- */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 720px) { .kpi-row { grid-template-columns: 1fr 1fr; } }
+  .kpi { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .kpi .label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+  .kpi .value { font-size: 30px; font-weight: 600; letter-spacing: -0.01em; }
+  .kpi .delta { font-size: 13px; margin-top: 6px; }
+  .up { color: var(--series-3); }
+  .dim { color: var(--text-muted); }
+
+  /* ---------- chart grid ---------- */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 860px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .chart-card.wide { grid-column: 1 / -1; }
+  .chart-card h3 { font-size: 15px; font-weight: 600; }
+  .chart-card .desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .chart { width: 100%; height: 320px; margin-top: 8px; }
+  .chart-card.wide .chart { height: 340px; }
+
+  details { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+  summary { cursor: pointer; font-size: 13px; color: var(--text-muted); user-select: none; }
+  summary:hover { color: var(--text-primary); }
+  pre {
+    margin-top: 10px; background: var(--page-plane); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; overflow-x: auto;
+    font-family: "Cascadia Code", "SF Mono", Consolas, monospace; font-size: 12.5px;
+    line-height: 1.5; color: var(--text-secondary);
+  }
+  .tag {
+    display: inline-block; font-size: 11px; color: var(--text-secondary);
+    background: var(--page-plane); border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 8px; margin-right: 6px;
+  }
+
+  /* ---------- footer ---------- */
+  footer { padding: 32px 0 56px; }
+  footer p { font-size: 13px; color: var(--text-muted); }
+  footer .links { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  footer .links span { font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="topbar">
+      <span class="badge">个人项目 · 求职作品集</span>
+      <button class="theme-btn" onclick="toggleTheme()">切换深浅色</button>
+    </div>
+    <h1>电商用户行为数据分析</h1>
+    <p class="subtitle">用 MySQL 从 0 搭建「用户 — 行为 — 订单」三表数据模型，独立实现 6 大核心业务指标口径（DAU / 留存 / 漏斗 / GMV / 新老客 / 同比），并可视化。</p>
+    <div class="meta">
+      <span>MySQL 9.7</span>
+      <span>DBeaver</span>
+      <span>窗口函数</span>
+      <span>ECharts</span>
+      <span>模拟数据</span>
+    </div>
+  </header>
+
+  <!-- 项目概述 -->
+  <section>
+    <div class="sec-title">项目概述</div>
+    <div class="overview">
+      <div class="card">
+        <h3>数据模型（3 张表）</h3>
+        <ul>
+          <li><code>user_info</code> 用户表 · 200 行 —— 注册日期 / 城市 / 获客渠道</li>
+          <li><code>user_event</code> 行为表 · 5,000 行 —— 浏览 / 加购 / 下单 / 支付 四类点击流</li>
+          <li><code>order_info</code> 订单表 · 1,200 行 —— 品类 / 金额 / 是否支付</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>做了什么</h3>
+        <ul>
+          <li>建表 + 造 13 个月时序数据（用于算同比）</li>
+          <li>用 SQL 实现并核对了 6 个指标口径</li>
+          <li>重点用窗口函数：<code>ROW_NUMBER / LAG / SUM OVER</code></li>
+          <li>沉淀《指标口径文档》+《真题 50 题》</li>
+        </ul>
+      </div>
+    </div>
+    <div class="disclaimer">
+      ⚠️ 本作品集所有数字为<strong>模拟数据</strong>（为演示指标口径与可视化而生成），规模按比例缩小、模式贴近真实业务（漏斗有流失、留存有衰减、GMV 有促销季节波动）。重点是展示 SQL 与指标计算能力，不代表真实公司数据。
+    </div>
+  </section>
+
+  <!-- KPI -->
+  <section>
+    <div class="sec-title">核心指标总览</div>
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="label">注册用户</div>
+        <div class="value">200</div>
+        <div class="delta dim">跨 13 个月</div>
+      </div>
+      <div class="kpi">
+        <div class="label">行为事件</div>
+        <div class="value">5,000</div>
+        <div class="delta dim">4 类点击流</div>
+      </div>
+      <div class="kpi">
+        <div class="label">已支付订单</div>
+        <div class="value">1,080</div>
+        <div class="delta dim">支付率 90%</div>
+      </div>
+      <div class="kpi">
+        <div class="label">累计 GMV</div>
+        <div class="value">¥55.2万</div>
+        <div class="delta up">2026-01 同比 +38.7%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 图表区 -->
+  <section>
+    <div class="sec-title">指标拆解</div>
+    <div class="chart-grid">
+
+      <div class="chart-card wide">
+        <h3>月度 GMV 趋势</h3>
+        <div class="desc">折线展示 13 个月 GMV 波动；6 月（618）与 11 月（双11）明显冲高，验证促销周期对成交的影响。</div>
+        <div id="c1" class="chart"></div>
+        <details>
+          <summary>查看 SQL</summary>
+          <pre>SELECT DATE_FORMAT(order_date, '%Y-%m') AS ym,
+       ROUND(SUM(amount)/10000, 2) AS gmv_wan
+FROM order_info
+WHERE is_paid = 1
+GROUP BY DATE_FORMAT(order_date, '%Y-%m')
+ORDER BY ym;</pre>
+        </details>
+      </div>
+
+      <div class="chart-card">
+        <h3>转化漏斗</h3>
+        <div class="desc">浏览 → 加购 → 下单 → 支付；数「人」用 COUNT(DISTINCT)，不能按步骤 GROUP BY。</div>
+        <div id="c2" class="chart"></div>
+        <details>
+          <summary>查看 SQL</summary>
+          <pre>SELECT event_type,
+       COUNT(DISTINCT user_id) AS uv,
+       COUNT(*) AS events
+FROM user_event
+GROUP BY event_type
+ORDER BY FIELD(event_type, 'view', 'cart', 'order', 'pay');</pre>
+        </details>
+      </div>
+
+      <div class="chart-card">
+        <h3>用户留存曲线（次日 ~ 7日）</h3>
+        <div class="desc">注册后第 N 天仍活跃的用户占比，逐日衰减，是衡量用户粘性的核心指标。</div>
+        <div id="c3" class="chart"></div>
+        <details>
+          <summary>查看 SQL</summary>
+          <pre>-- 次日留存率 = 注册次日仍活跃的去重用户数 / 注册用户总数
+-- 将 DATEDIFF(...)=1 换成 1..7 逐天计算，即得留存曲线
+SELECT ROUND(COUNT(DISTINCT CASE
+            WHEN DATEDIFF(DATE(b.event_time), a.register_date) = 1
+            THEN a.user_id END)
+       / COUNT(DISTINCT a.user_id) * 100, 1) AS day1_retention_pct
+FROM user_info a
+LEFT JOIN user_event b ON b.user_id = a.user_id;</pre>
+        </details>
+      </div>
+
+      <div class="chart-card">
+        <h3>品类 GMV 占比</h3>
+        <div class="desc">数码类贡献最高；占比用窗口函数 SUM(...) OVER() 一次算出，无需二次查询。</div>
+        <div id="c4" class="chart"></div>
+        <details>
+          <summary>查看 SQL</summary>
+          <pre>SELECT category,
+       ROUND(SUM(amount)/10000, 2) AS gmv_wan,
+       ROUND(SUM(amount) / SUM(SUM(amount)) OVER (), 4) AS pct
+FROM order_info
+WHERE is_paid = 1
+GROUP BY category
+ORDER BY gmv_wan DESC;</pre>
+        </details>
+      </div>
+
+      <div class="chart-card">
+        <h3>新老客 GMV 拆分</h3>
+        <div class="desc">用 ROW_NUMBER() 按用户首单标记新客（rn=1）与老客，老客贡献更高。</div>
+        <div id="c5" class="chart"></div>
+        <details>
+          <summary>查看 SQL</summary>
+          <pre>WITH ranked AS (
+  SELECT user_id, amount,
+         ROW_NUMBER() OVER (PARTITION BY user_id
+                            ORDER BY order_date, order_id) AS rn
+  FROM order_info WHERE is_paid = 1
+)
+SELECT CASE WHEN rn = 1 THEN '新客' ELSE '老客' END AS cust_type,
+       ROUND(SUM(amount)/10000, 2) AS gmv_wan
+FROM ranked
+GROUP BY cust_type;</pre>
+        </details>
+      </div>
+
+      <div class="chart-card wide">
+        <h3>近 30 天 DAU 趋势</h3>
+        <div class="desc">按日去重活跃用户数；周末明显抬升，工作日回落，呈现典型的电商活跃节奏。</div>
+        <div id="c6" class="chart"></div>
+        <details>
+          <summary>查看 SQL</summary>
+          <pre>SELECT DATE(event_time) AS dt, COUNT(DISTINCT user_id) AS dau
+FROM user_event
+GROUP BY DATE(event_time)
+ORDER BY dt;</pre>
+        </details>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 口径速查 -->
+  <section>
+    <div class="sec-title">指标口径速查（面试口答）</div>
+    <div class="overview">
+      <div class="card">
+        <h3>几个最容易被追问的口径</h3>
+        <ul>
+          <li><strong>留存</strong>：分母=注册用户数，分子=注册第 N 天仍活跃的去重用户；日期用 DATEDIFF 对齐。</li>
+          <li><strong>漏斗</strong>：数人用 <code>COUNT(DISTINCT user_id)</code>，不能按 step 分组。</li>
+          <li><strong>新老客</strong>：按用户首单时间分，<code>ROW_NUMBER()=1</code> 为首单。</li>
+          <li><strong>同比</strong>：<code>LAG(gmv, 12)</code> 取去年同月，需至少 13 个月数据。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>窗口函数三个易错点</h3>
+        <ul>
+          <li><strong>RANK vs DENSE_RANK vs ROW_NUMBER</strong>：并列是否跳号、是否拆开。</li>
+          <li><strong>SUM OVER 默认 RANGE</strong>：逐行累加要显式写 <code>ROWS BETWEEN ...</code>。</li>
+          <li><strong>WHERE vs HAVING</strong>：WHERE 过滤原始行，HAVING 过滤分组聚合结果。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>本作品集为个人练习项目，数据为模拟数据；重点展示 MySQL 指标口径实现与数据可视化能力。</p>
+    <div class="links">
+      <span>MySQL 9.7</span><span>DBeaver</span><span>ECharts 5</span><span>HTML / CSS / JS</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ---------- theme ----------
+  let currentTheme = localStorage.getItem('pf-theme')
+    || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('pf-theme', t);
+  }
+  function toggleTheme() {
+    currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+    applyTheme(currentTheme);
+    renderAll();
+  }
+  applyTheme(currentTheme);
+
+  function palette() {
+    const cs = getComputedStyle(document.documentElement);
+    const v = n => cs.getPropertyValue(n).trim();
+    return {
+      surface: v('--surface-1'), ink: v('--text-primary'),
+      ink2: v('--text-secondary'), muted: v('--text-muted'),
+      grid: v('--gridline'), baseline: v('--baseline'),
+      s1: v('--series-1'), s2: v('--series-2'), s3: v('--series-3'),
+      seq250: v('--seq-250'), seq300: v('--seq-300'),
+      seq450: v('--seq-450'), seq600: v('--seq-600'),
+    };
+  }
+
+  const charts = {};
+
+  function baseAxis(p, axis) {
+    return {
+      axisLine: { lineStyle: { color: p.baseline } },
+      axisTick: { show: false },
+      axisLabel: { color: p.muted, fontSize: 11 },
+      splitLine: axis === 'y'
+        ? { lineStyle: { color: p.grid, width: 1 } }
+        : { show: false },
+    };
+  }
+  function tip(p, formatter) {
+    return {
+      trigger: 'axis',
+      backgroundColor: p.surface,
+      borderColor: p.baseline, borderWidth: 1,
+      textStyle: { color: p.ink, fontSize: 12 },
+      ...(formatter ? { formatter } : {}),
+    };
+  }
+
+  // 数据（模拟）
+  const months = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07',
+                  '2025-08','2025-09','2025-10','2025-11','2025-12','2026-01'];
+  const gmv = [3.1,2.7,3.4,3.6,3.9,5.4,4.0,4.2,4.4,4.6,6.6,5.0,4.3];
+
+  const funnelStages = ['支付','下单','加购','浏览'];
+  const funnelVals = [520,760,1240,2480];
+
+  const retDays = ['D1','D2','D3','D4','D5','D6','D7'];
+  const retention = [36,26,20,16,13,11,9];
+
+  const cats = ['数码','服饰','食品','家居','美妆'];
+  const catGmv = [19.1,13.4,9.8,7.5,5.5];
+
+  const custType = ['老客','新客'];
+  const custGmv = [34.2,21.0];
+
+  // 近 30 天（2025-12-03 起）
+  const dauLabels = []; const dau = [];
+  (function(){
+    const start = new Date(2025, 11, 3); // Dec 3
+    const weekendIdx = new Set([3,4,10,11,17,18,24,25]);
+    const vals = [17,16,17,23,25,18,17,16,18,19,24,26,18,17,18,19,20,25,27,19,18,19,20,21,26,28,20,19,20,21];
+    for (let i=0;i<30;i++){
+      const d = new Date(start); d.setDate(start.getDate()+i);
+      dauLabels.push((d.getMonth()+1)+'/'+d.getDate());
+      dau.push(vals[i]);
+    }
+  })();
+
+  function renderAll() {
+    const p = palette();
+    const axis = { valueAxis: baseAxis(p,'y'), catAxis: baseAxis(p,'x') };
+
+    // 1. GMV 趋势
+    charts.c1 = echarts.init(document.getElementById('c1'));
+    charts.c1.setOption({
+      grid: { left: 46, right: 20, top: 30, bottom: 40 },
+      tooltip: tip(p, ps => ps[0].axisValue + '<br/>GMV：' + ps[0].value + ' 万元'),
+      xAxis: { type:'category', data: months, ...baseAxis(p,'x'), boundaryGap: false },
+      yAxis: { type:'value', ...baseAxis(p,'y'), name:'万元', nameTextStyle:{color:p.muted} },
+      series: [{
+        type:'line', data: gmv, name:'GMV',
+        smooth: true, symbol: 'circle', symbolSize: 7,
+        lineStyle: { width: 2, color: p.s1 },
+        itemStyle: { color: p.s1, borderColor: p.surface, borderWidth: 2 },
+        areaStyle: { color: p.s1, opacity: 0.10 },
+        markPoint: {
+          symbol: 'circle', symbolSize: 8,
+          data: [{ type:'max', name:'峰值' }],
+          label: { show: true, formatter: '{c}万', color: p.ink2, fontSize: 11 },
+          itemStyle: { color: p.s1, borderColor: p.surface, borderWidth: 2 },
+        },
+      }],
+    });
+
+    // 2. 漏斗（横向条形）
+    const funnelColors = [p.seq250, p.seq300, p.seq450, p.seq600];
+    charts.c2 = echarts.init(document.getElementById('c2'));
+    charts.c2.setOption({
+      grid: { left: 56, right: 70, top: 20, bottom: 24 },
+      tooltip: { trigger:'axis', axisPointer:{type:'shadow'},
+        backgroundColor:p.surface, borderColor:p.baseline, textStyle:{color:p.ink,fontSize:12} },
+      xAxis: { type:'value', ...baseAxis(p,'y'), splitLine:{show:false} },
+      yAxis: { type:'category', data: funnelStages, ...baseAxis(p,'x'), splitLine:{show:false} },
+      series: [{
+        type:'bar', data: funnelVals.map((v,i)=>({value:v, itemStyle:{color:funnelColors[i], borderRadius:[0,4,4,0]}})),
+        barWidth: 18,
+        label: { show: true, position:'right', color: p.ink2, fontSize: 12,
+                 formatter: p => p.value },
+      }],
+    });
+
+    // 3. 留存
+    charts.c3 = echarts.init(document.getElementById('c3'));
+    charts.c3.setOption({
+      grid: { left: 46, right: 20, top: 30, bottom: 36 },
+      tooltip: tip(p, ps => ps[0].axisValue + ' 留存：' + ps[0].value + '%'),
+      xAxis: { type:'category', data: retDays, ...baseAxis(p,'x') },
+      yAxis: { type:'value', ...baseAxis(p,'y'), name:'%', nameTextStyle:{color:p.muted}, max: 40 },
+      series: [{
+        type:'line', data: retention, name:'留存率',
+        smooth: true, symbol:'circle', symbolSize:7,
+        lineStyle:{ width:2, color:p.s1 }, itemStyle:{ color:p.s1, borderColor:p.surface, borderWidth:2 },
+        areaStyle:{ color:p.s1, opacity:0.10 },
+        endLabel: { show:true, formatter:'{c}%', color:p.ink2, fontSize:12 },
+      }],
+    });
+
+    // 4. 品类 GMV
+    charts.c4 = echarts.init(document.getElementById('c4'));
+    charts.c4.setOption({
+      grid: { left: 56, right: 56, top: 20, bottom: 24 },
+      tooltip: { trigger:'axis', axisPointer:{type:'shadow'},
+        backgroundColor:p.surface, borderColor:p.baseline, textStyle:{color:p.ink,fontSize:12} },
+      xAxis: { type:'value', ...baseAxis(p,'y'), splitLine:{show:false} },
+      yAxis: { type:'category', data: cats, ...baseAxis(p,'x'), splitLine:{show:false} },
+      series: [{
+        type:'bar', data: catGmv, barWidth: 18,
+        itemStyle:{ color: p.s1, borderRadius:[0,4,4,0] },
+        label: { show:true, position:'right', color:p.ink2, fontSize:12, formatter:'{c}万' },
+      }],
+    });
+
+    // 5. 新老客 GMV
+    charts.c5 = echarts.init(document.getElementById('c5'));
+    charts.c5.setOption({
+      grid: { left: 56, right: 56, top: 30, bottom: 24 },
+      tooltip: { trigger:'axis', axisPointer:{type:'shadow'},
+        backgroundColor:p.surface, borderColor:p.baseline, textStyle:{color:p.ink,fontSize:12} },
+      legend: { top: 0, textStyle:{ color: p.ink2, fontSize:12 }, itemWidth:12, itemHeight:12 },
+      xAxis: { type:'value', ...baseAxis(p,'y'), splitLine:{show:false} },
+      yAxis: { type:'category', data: custType, ...baseAxis(p,'x'), splitLine:{show:false} },
+      series: [
+        { name:'老客', type:'bar', data:[34.2, null], barWidth:18,
+          itemStyle:{ color:p.s2, borderRadius:[0,4,4,0] },
+          label:{ show:true, position:'right', color:p.ink2, fontSize:12, formatter:'{c}万' } },
+        { name:'新客', type:'bar', data:[null, 21.0], barWidth:18,
+          itemStyle:{ color:p.s1, borderRadius:[0,4,4,0] },
+          label:{ show:true, position:'right', color:p.ink2, fontSize:12, formatter:'{c}万' } },
+      ],
+    });
+
+    // 6. DAU
+    charts.c6 = echarts.init(document.getElementById('c6'));
+    charts.c6.setOption({
+      grid: { left: 46, right: 20, top: 30, bottom: 40 },
+      tooltip: tip(p, ps => ps[0].axisValue + ' DAU：' + ps[0].value),
+      xAxis: { type:'category', data: dauLabels, ...baseAxis(p,'x'), boundaryGap:false,
+               axisLabel:{ color:p.muted, fontSize:10, interval: 2 } },
+      yAxis: { type:'value', ...baseAxis(p,'y') },
+      series: [{
+        type:'line', data: dau, name:'DAU',
+        smooth: true, symbol:'none',
+        lineStyle:{ width:2, color:p.s1 },
+        areaStyle:{ color:p.s1, opacity:0.10 },
+      }],
+    });
+
+    window.addEventListener('resize', () => {
+      Object.values(charts).forEach(c => c && c.resize());
+    });
+  }
+
+  renderAll();
+</script>
+</body>
+</html>
