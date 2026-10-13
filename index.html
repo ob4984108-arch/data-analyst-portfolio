@@ -200,7 +200,7 @@
           <li>建表 + 造 13 个月时序数据（用于算同比）</li>
           <li>用 SQL 实现并核对了 6 个指标口径</li>
           <li>重点用窗口函数：<code>ROW_NUMBER / LAG / SUM OVER</code></li>
-          <li>沉淀《指标口径文档》+《真题 50 题》</li>
+          <li>沉淀《指标口径文档》+《SQL 训练题 50 道》</li>
         </ul>
       </div>
     </div>
@@ -341,10 +341,10 @@ ORDER BY dt;</pre>
 
   <!-- 口径速查 -->
   <section>
-    <div class="sec-title">指标口径速查（面试口答）</div>
+    <div class="sec-title">指标口径速查</div>
     <div class="overview">
       <div class="card">
-        <h3>几个最容易被追问的口径</h3>
+        <h3>核心指标口径要点</h3>
         <ul>
           <li><strong>留存</strong>：分母=注册用户数，分子=注册第 N 天仍活跃的去重用户；日期用 DATEDIFF 对齐。</li>
           <li><strong>漏斗</strong>：数人用 <code>COUNT(DISTINCT user_id)</code>，不能按 step 分组。</li>
